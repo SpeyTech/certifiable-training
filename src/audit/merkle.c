@@ -15,6 +15,7 @@
  */
 
 #include "merkle.h"
+#include <assert.h>
 #include <string.h>
 #include <time.h>
 
@@ -114,6 +115,7 @@ void ct_sha256_init(ct_sha256_ctx_t *ctx) {
 
 void ct_sha256_update(ct_sha256_ctx_t *ctx, const void *data, size_t len) {
     const uint8_t *p = (const uint8_t *)data;
+    assert(p != NULL);  /* GCC 15 -fanalyzer interprocedural false positive */
     size_t buf_idx = (size_t)(ctx->count & 63);
     
     ctx->count += len;
