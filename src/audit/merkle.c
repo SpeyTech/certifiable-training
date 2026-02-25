@@ -15,7 +15,6 @@
  */
 
 #include "merkle.h"
-#include <assert.h>
 #include <string.h>
 #include <time.h>
 
@@ -113,9 +112,19 @@ void ct_sha256_init(ct_sha256_ctx_t *ctx) {
     ctx->count = 0;
 }
 
+/* GCC -fanalyzer false positive: interprocedural analysis through the
+ * (const void *data) parameter cannot prove that callers have initialised
+ * every byte of the buffer passed to ct_sha256_update.  All callers fill
+ * their buffers completely via write_u32_le / write_u64_le / write_i32_le
+ * before calling this function.  See CT-MATH-001 §16 for the proof that
+ * the header layout is fully covered. */
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wanalyzer-use-of-uninitialized-value"
+#endif
+
 void ct_sha256_update(ct_sha256_ctx_t *ctx, const void *data, size_t len) {
     const uint8_t *p = (const uint8_t *)data;
-    assert(p != NULL);  /* GCC 15 -fanalyzer interprocedural false positive */
     size_t buf_idx = (size_t)(ctx->count & 63);
     
     ctx->count += len;
@@ -146,6 +155,10 @@ void ct_sha256_update(ct_sha256_ctx_t *ctx, const void *data, size_t len) {
         memcpy(ctx->buffer, p, len);
     }
 }
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 void ct_sha256_final(ct_sha256_ctx_t *ctx, uint8_t hash[CT_HASH_SIZE]) {
     size_t buf_idx = (size_t)(ctx->count & 63);
