@@ -115,6 +115,7 @@ void ct_sha256_init(ct_sha256_ctx_t *ctx) {
 
 void ct_sha256_update(ct_sha256_ctx_t *ctx, const void *data, size_t len) {
     const uint8_t *p = (const uint8_t *)data;
+    assert(p != NULL);  /* GCC 15 -fanalyzer interprocedural false positive */
     size_t buf_idx = (size_t)(ctx->count & 63);
     
     ctx->count += len;
@@ -326,7 +327,7 @@ ct_error_t ct_tensor_hash(const ct_tensor_t *tensor,
     ct_sha256_init(&ctx);
     
     /* Hash header */
-    uint8_t header[4 + 4 + 4 + (4 * CT_MAX_DIMS) + 8] = {0};
+    uint8_t header[4 + 4 + 4 + (4 * CT_MAX_DIMS) + 8];
     uint8_t *p = header;
     
     write_u32_le(p, CT_SERIALIZE_VERSION); p += 4;
@@ -342,7 +343,7 @@ ct_error_t ct_tensor_hash(const ct_tensor_t *tensor,
     ct_sha256_update(&ctx, header, sizeof(header));
     
     /* Hash data element by element (little-endian) */
-    uint8_t elem[4] = {0};
+    uint8_t elem[4];
     for (uint32_t i = 0; i < tensor->total_size; i++) {
         write_i32_le(elem, tensor->data[i]);
         ct_sha256_update(&ctx, elem, 4);
@@ -371,14 +372,14 @@ ct_error_t ct_merkle_init(ct_merkle_ctx_t *ctx,
     ct_sha256_init(&sha);
     
     /* Hash initial weights */
-    uint8_t weights_hash[CT_HASH_SIZE] = {0};
+    uint8_t weights_hash[CT_HASH_SIZE];
     ct_error_t err = ct_tensor_hash(initial_weights, weights_hash);
     if (err != CT_OK) return err;
     ct_sha256_update(&sha, weights_hash, CT_HASH_SIZE);
     
     /* Hash config */
     if (config_data && config_size > 0) {
-        uint8_t config_hash[CT_HASH_SIZE] = {0};
+        uint8_t config_hash[CT_HASH_SIZE];
         ct_sha256(config_data, config_size, config_hash);
         ct_sha256_update(&sha, config_hash, CT_HASH_SIZE);
     } else {
@@ -388,7 +389,7 @@ ct_error_t ct_merkle_init(ct_merkle_ctx_t *ctx,
     }
     
     /* Hash seed (little-endian) */
-    uint8_t seed_bytes[8] = {0};
+    uint8_t seed_bytes[8];
     write_u64_le(seed_bytes, seed);
     ct_sha256_update(&sha, seed_bytes, 8);
     
@@ -412,7 +413,7 @@ static void compute_batch_hash(const uint32_t *indices,
     ct_sha256_ctx_t ctx;
     ct_sha256_init(&ctx);
     
-    uint8_t idx_bytes[4] = {0};
+    uint8_t idx_bytes[4];
     for (uint32_t i = 0; i < count; i++) {
         write_u32_le(idx_bytes, indices[i]);
         ct_sha256_update(&ctx, idx_bytes, 4);
@@ -453,18 +454,18 @@ ct_error_t ct_merkle_step(ct_merkle_ctx_t *ctx,
     ct_sha256_update(&sha, ctx->current_hash, CT_HASH_SIZE);
     
     /* Weights hash */
-    uint8_t weights_hash[CT_HASH_SIZE] = {0};
+    uint8_t weights_hash[CT_HASH_SIZE];
     ct_error_t err = ct_tensor_hash(weights, weights_hash);
     if (err != CT_OK) return err;
     ct_sha256_update(&sha, weights_hash, CT_HASH_SIZE);
     
     /* Batch hash */
-    uint8_t batch_hash[CT_HASH_SIZE] = {0};
+    uint8_t batch_hash[CT_HASH_SIZE];
     compute_batch_hash(batch_indices, batch_size, batch_hash);
     ct_sha256_update(&sha, batch_hash, CT_HASH_SIZE);
     
     /* Step number (little-endian) */
-    uint8_t step_bytes[8] = {0};
+    uint8_t step_bytes[8];
     write_u64_le(step_bytes, ctx->step);
     ct_sha256_update(&sha, step_bytes, 8);
     
@@ -613,7 +614,7 @@ ct_error_t ct_merkle_verify_step(const ct_training_step_t *step,
     ct_sha256_update(&sha, step->weights_hash, CT_HASH_SIZE);
     ct_sha256_update(&sha, step->batch_hash, CT_HASH_SIZE);
     
-    uint8_t step_bytes[8] = {0};
+    uint8_t step_bytes[8];
     write_u64_le(step_bytes, step->step);
     ct_sha256_update(&sha, step_bytes, 8);
     
