@@ -1,0 +1,11 @@
+import ct = certifiable-training%liba{certifiable-training}
+
+exes = exe{ \
+  certifiable_inference_train_xor \
+  certifiable_inference_verify_step \
+  }
+
+exe{certifiable_inference_train_xor}: c{train_xor} $ct
+exe{certifiable_inference_verify_step}: c{verify_step} $ct
+
+./: $exes

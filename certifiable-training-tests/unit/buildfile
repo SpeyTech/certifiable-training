@@ -1,0 +1,34 @@
+import ct = certifiable-training%liba{certifiable-training}
+
+tests = exe{ \
+  certifiable_training_test_backward \
+  certifiable_training_test_bit_identity \
+  certifiable_training_test_compensated \
+  certifiable_training_test_forward \
+  certifiable_training_test_merkle \
+  certifiable_training_test_optimizer \
+  certifiable_training_test_permutation \
+  certifiable_training_test_primitives \
+  certifiable_training_test_prng \
+  certifiable_training_test_reduction \
+  }
+
+exe{certifiable_training_test_backward}: c{test_backward} $ct
+exe{certifiable_training_test_bit_identity}: c{test_bit_identity} $ct
+exe{certifiable_training_test_compensated}: c{test_compensated} $ct
+exe{certifiable_training_test_forward}: c{test_forward} $ct
+exe{certifiable_training_test_merkle}: c{test_merkle} $ct
+exe{certifiable_training_test_optimizer}: c{test_optimizer} $ct
+exe{certifiable_training_test_permutation}: c{test_permutation} $ct
+exe{certifiable_training_test_primitives}: c{test_primitives} $ct
+exe{certifiable_training_test_prng}: c{test_prng} $ct
+exe{certifiable_training_test_reduction}: c{test_reduction} $ct
+
+$tests:
+{
+  c.coptions += -UNDEBUG
+  c.libs += -lm
+  test = true
+}
+
+./: $tests

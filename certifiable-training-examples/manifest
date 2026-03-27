@@ -1,0 +1,16 @@
+: 1
+name: certifiable-training-examples
+version: 0.1.0-a.0.z
+language: c
+project: certifiable-training
+summary: Certifiable inference engine with deterministic behavior
+license: other: proprietary
+description-file: README.md
+url: https://github.com/SpeyTech/certifiable-training
+package-url: https://github.com/SpeyTech/certifiable-training/certifiable-training-examples
+build-error-email: william@fstopify.com
+builds: default
+builds: -windows
+builds: -binddist
+requires: * build2 >= 0.16.0
+requires: * bpkg >= 0.16.0

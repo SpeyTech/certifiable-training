@@ -35,20 +35,6 @@
 *.exe.manifest
 *.pc
 
-# Editor files
-*.swp
-*.swo
-*~
-.vscode/
-.idea/
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Test artifacts
-Testing/
-*.log
-
-# Generated files
-*.d
+# Build2 symlinks exes from build dir to src dir for convenient
+/src/certifiable_inference_train_xor
+/src/certifiable_inference_verify_step
