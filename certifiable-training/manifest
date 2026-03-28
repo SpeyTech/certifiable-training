@@ -6,10 +6,12 @@ language: c
 summary: Certifiable inference engine with deterministic behavior
 license: other: proprietary
 description-file: README.md
-package-description-file: PACKAGE-README.md
 url: https://github.com/SpeyTech/certifiable-training
-package-url: https://github.com/SpeyTech/certifiable-training
-package-email: packaging@build2.org ; Mailing list.
+package-url: https://github.com/SpeyTech/certifiable-training/certifiable-training
+build-error-email: william@fstopify.com
+builds: default
+builds: -windows
+builds: -binddist
 depends: * build2 >= 0.16.0
 depends: * bpkg >= 0.16.0
 tests: certifiable-training-tests == $
